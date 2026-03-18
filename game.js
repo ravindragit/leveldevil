@@ -10,6 +10,15 @@ const PLAYER_SIZE = 30;
 const STORAGE_KEY = 'leveldevil:stats:v1';
 const SETTINGS_KEY = 'leveldevil:settings:v1';
 
+function clearAllSavedData() {
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    try { localStorage.removeItem(SETTINGS_KEY); } catch {}
+    persistentStats = loadStats();
+    settings = loadSettings();
+    updateStatsUI();
+    updateMuteUI();
+}
+
 // Game State
 let gameState = {
     currentLevel: 0,
@@ -511,6 +520,11 @@ document.addEventListener('keydown', (e) => {
 
     if (e.code === 'KeyL') {
         toggleLevelSelect();
+        return;
+    }
+
+    if (e.code === 'KeyC') {
+        clearAllSavedData();
         return;
     }
     
