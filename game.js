@@ -6,6 +6,9 @@ const JUMP_FORCE = -12;
 const MOVE_SPEED = 5;
 const PLAYER_SIZE = 30;
 
+// Persistence (localStorage)
+const STORAGE_KEY = 'leveldevil:stats:v1';
+
 // Game State
 let gameState = {
     currentLevel: 0,
@@ -22,6 +25,52 @@ let gameState = {
         maxTime: 90 // 1.5 seconds at 60fps
     }
 };
+
+let persistentStats = loadStats();
+
+function loadStats() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+            return { bestRunDeaths: null, bestLevelTimesMs: {} };
+        }
+        const parsed = JSON.parse(raw);
+        return {
+            bestRunDeaths: typeof parsed.bestRunDeaths === 'number' ? parsed.bestRunDeaths : null,
+            bestLevelTimesMs: parsed.bestLevelTimesMs && typeof parsed.bestLevelTimesMs === 'object' ? parsed.bestLevelTimesMs : {}
+        };
+    } catch {
+        return { bestRunDeaths: null, bestLevelTimesMs: {} };
+    }
+}
+
+function saveStats() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(persistentStats));
+    } catch {
+        // ignore storage failures (private mode, quota, etc.)
+    }
+}
+
+function formatBestTime(ms) {
+    if (typeof ms !== 'number' || !Number.isFinite(ms)) return '—';
+    const seconds = ms / 1000;
+    if (seconds < 10) return `${seconds.toFixed(2)}s`;
+    return `${seconds.toFixed(1)}s`;
+}
+
+function updateStatsUI() {
+    const bestRunDeathsEl = document.getElementById('best-run-deaths');
+    const bestLevelTimeEl = document.getElementById('best-level-time');
+    if (bestRunDeathsEl) {
+        bestRunDeathsEl.textContent =
+            typeof persistentStats.bestRunDeaths === 'number' ? String(persistentStats.bestRunDeaths) : '—';
+    }
+    if (bestLevelTimeEl) {
+        const key = String(gameState.currentLevel);
+        bestLevelTimeEl.textContent = formatBestTime(persistentStats.bestLevelTimesMs[key]);
+    }
+}
 
 // Player
 const player = {
@@ -347,6 +396,7 @@ function loadLevel(levelIndex) {
     
     document.getElementById('level-display').textContent = levelIndex + 1;
     document.getElementById('death-count').textContent = gameState.deaths;
+    updateStatsUI();
     hideModal('game-over');
     hideModal('death-screen');
     hideModal('pause-screen');
@@ -708,6 +758,26 @@ function playerDie() {
 function levelComplete() {
     gameState.gameRunning = false;
     showModal('game-over');
+
+    // Persist best time for this level
+    const elapsedMs = Math.round((gameState.levelTimer / 60) * 1000);
+    const levelKey = String(gameState.currentLevel);
+    const prevBest = persistentStats.bestLevelTimesMs[levelKey];
+    if (typeof prevBest !== 'number' || elapsedMs < prevBest) {
+        persistentStats.bestLevelTimesMs[levelKey] = elapsedMs;
+        saveStats();
+        updateStatsUI();
+    }
+
+    // If this was the final level, persist best run deaths
+    if (gameState.currentLevel === levels.length - 1) {
+        const prevRunBest = persistentStats.bestRunDeaths;
+        if (typeof prevRunBest !== 'number' || gameState.deaths < prevRunBest) {
+            persistentStats.bestRunDeaths = gameState.deaths;
+            saveStats();
+            updateStatsUI();
+        }
+    }
     
     setTimeout(() => {
         if (gameState.keys['Space']) {
@@ -953,5 +1023,6 @@ function getStartLevel() {
 
 // Start game
 loadLevel(getStartLevel());
+updateStatsUI();
 gameLoop();
 
