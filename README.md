@@ -84,6 +84,13 @@ A web-based platformer game inspired by Level Devil, featuring deceptive level d
 - **← → Arrow Keys**: Move left/right
 - **Space / ↑ Arrow**: Jump
 - **R Key**: Restart current level
+- **P / Esc**: Pause
+- **M**: Mute
+- **L**: Level Select
+- **F**: Fullscreen
+- **V**: Reduced Motion
+- **H**: HUD
+- **C**: Clear saved stats/settings
 
 ## 🚀 How to Play
 
@@ -171,6 +178,8 @@ Like the original Level Devil, this game is designed to:
 
 - All obstacles reset when you restart a level
 - The game saves your death count across levels
+- Best per-level time and best run deaths are saved locally
+- Last played level is remembered (when no `?level=` is provided)
 - Congratulations screen appears after beating all 5 levels
 - Death counter never resets (embrace the pain!)
 
