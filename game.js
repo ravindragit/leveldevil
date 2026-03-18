@@ -497,6 +497,11 @@ function loadLevel(levelIndex) {
 
 // Input handling
 document.addEventListener('keydown', (e) => {
+    // Prevent the page from scrolling while playing (space/arrows)
+    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'ArrowDown' || e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+        e.preventDefault();
+    }
+    
     gameState.keys[e.code] = true;
     
     if (e.code === 'KeyM') {
@@ -526,6 +531,9 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('keyup', (e) => {
+    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'ArrowDown' || e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+        e.preventDefault();
+    }
     gameState.keys[e.code] = false;
 });
 
