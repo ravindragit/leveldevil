@@ -527,6 +527,11 @@ document.addEventListener('keydown', (e) => {
         clearAllSavedData();
         return;
     }
+
+    if (e.code === 'KeyF') {
+        toggleFullscreen();
+        return;
+    }
     
     if (e.code === 'KeyP' || e.code === 'Escape') {
         // Close level select first if it's open
@@ -549,6 +554,38 @@ document.addEventListener('keyup', (e) => {
         e.preventDefault();
     }
     gameState.keys[e.code] = false;
+});
+
+// Fullscreen
+const fullscreenBtn = document.getElementById('fullscreen-btn');
+if (fullscreenBtn) fullscreenBtn.addEventListener('click', () => toggleFullscreen());
+
+function isFullscreen() {
+    return Boolean(document.fullscreenElement);
+}
+
+function updateFullscreenUI() {
+    const btn = document.getElementById('fullscreen-btn');
+    if (!btn) return;
+    btn.textContent = isFullscreen() ? '⤢' : '⛶';
+    btn.setAttribute('aria-label', isFullscreen() ? 'Exit fullscreen' : 'Enter fullscreen');
+    btn.setAttribute('title', isFullscreen() ? 'Exit fullscreen (F)' : 'Fullscreen (F)');
+}
+
+function toggleFullscreen() {
+    const container = document.querySelector('.game-container');
+    if (!container) return;
+    if (!document.fullscreenEnabled) return;
+    
+    if (!isFullscreen()) {
+        container.requestFullscreen().catch(() => {});
+    } else {
+        document.exitFullscreen().catch(() => {});
+    }
+}
+
+document.addEventListener('fullscreenchange', () => {
+    updateFullscreenUI();
 });
 
 // Level select
@@ -1260,5 +1297,6 @@ function getStartLevel() {
 loadLevel(getStartLevel());
 updateStatsUI();
 updateMuteUI();
+updateFullscreenUI();
 gameLoop();
 
