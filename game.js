@@ -503,8 +503,18 @@ document.addEventListener('keydown', (e) => {
         toggleMuted();
         return;
     }
+
+    if (e.code === 'KeyL') {
+        toggleLevelSelect();
+        return;
+    }
     
     if (e.code === 'KeyP' || e.code === 'Escape') {
+        // Close level select first if it's open
+        if (!document.getElementById('level-select')?.classList.contains('hidden')) {
+            toggleLevelSelect(false);
+            return;
+        }
         togglePause();
         return;
     }
@@ -518,6 +528,60 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('keyup', (e) => {
     gameState.keys[e.code] = false;
 });
+
+// Level select
+const levelSelectBtn = document.getElementById('level-select-btn');
+const levelSelectModal = document.getElementById('level-select');
+const levelGrid = document.getElementById('level-select-grid');
+
+if (levelSelectBtn) levelSelectBtn.addEventListener('click', () => toggleLevelSelect());
+
+function buildLevelSelect() {
+    if (!levelGrid) return;
+    if (levelGrid.childElementCount > 0) return;
+    levels.forEach((lvl, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'level-tile';
+        btn.innerHTML = `<div class="lvl">Level ${idx + 1}</div><div class="name">${lvl.name}</div>`;
+        btn.addEventListener('click', () => {
+            toggleLevelSelect(false);
+            loadLevel(idx);
+            setUrlLevel(idx);
+        });
+        levelGrid.appendChild(btn);
+    });
+}
+
+function setUrlLevel(levelIndex) {
+    try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('level', String(levelIndex + 1));
+        window.history.replaceState({}, '', url.toString());
+    } catch {
+        // ignore
+    }
+}
+
+function toggleLevelSelect(forceValue) {
+    buildLevelSelect();
+    if (!levelSelectModal) return;
+
+    const next = typeof forceValue === 'boolean'
+        ? forceValue
+        : levelSelectModal.classList.contains('hidden');
+
+    if (next) {
+        // Pause gameplay while selecting
+        if (!gameState.paused) togglePause(true, { showOverlay: false });
+        levelSelectModal.classList.remove('hidden');
+    } else {
+        levelSelectModal.classList.add('hidden');
+        // Keep the game paused if the pause modal is showing; otherwise resume.
+        if (!document.getElementById('pause-screen')?.classList.contains('hidden')) return;
+        togglePause(false, { showOverlay: false });
+    }
+}
 
 // Touch controls
 function setKey(code, pressed) {
@@ -573,15 +637,17 @@ if (restartBtn) restartBtn.addEventListener('click', () => {
 });
 if (muteBtn) muteBtn.addEventListener('click', () => toggleMuted());
 
-function togglePause(forceValue) {
+function togglePause(forceValue, options = {}) {
     if (!gameState.gameRunning && !gameState.deathAnimation.active) return;
     if (gameState.deathAnimation.active) return;
     
+    const showOverlay = options.showOverlay !== false;
     const next = typeof forceValue === 'boolean' ? forceValue : !gameState.paused;
     gameState.paused = next;
     
     if (gameState.paused) {
-        showModal('pause-screen');
+        if (showOverlay) showModal('pause-screen');
+        else hideModal('pause-screen');
         playSound('pause');
     } else {
         hideModal('pause-screen');

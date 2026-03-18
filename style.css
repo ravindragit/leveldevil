@@ -188,6 +188,11 @@ body {
     box-shadow: 0 0 40px rgba(55, 66, 250, 0.35);
 }
 
+.modal-content.select {
+    background: linear-gradient(135deg, #0b4f6c 0%, #1b1b3a 100%);
+    box-shadow: 0 0 40px rgba(11, 79, 108, 0.4);
+}
+
 .modal-content h2 {
     font-size: 2.5em;
     margin-bottom: 15px;
@@ -196,6 +201,47 @@ body {
 
 .modal-content p {
     font-size: 1.3em;
+}
+
+.level-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.level-tile {
+    border: 2px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border-radius: 14px;
+    padding: 12px 10px;
+    cursor: pointer;
+    transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.level-tile:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.28);
+}
+
+.level-tile .lvl {
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #2ecc71;
+}
+
+.level-tile .name {
+    margin-top: 6px;
+    font-size: 0.85em;
+    color: rgba(255, 255, 255, 0.88);
+}
+
+@media (max-width: 650px) {
+    .level-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
 }
 
 .modal-actions {

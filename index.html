@@ -16,6 +16,9 @@
                 <button id="mute-btn" class="icon-btn" type="button" aria-label="Toggle mute" title="Toggle mute (M)">
                     🔊
                 </button>
+                <button id="level-select-btn" class="icon-btn" type="button" aria-label="Open level select" title="Level select (L)">
+                    🧭
+                </button>
             </div>
             <div class="game-stats">
                 <span>Best Run Deaths: <span id="best-run-deaths">—</span></span>
@@ -41,6 +44,7 @@
             <p>R: Restart Level</p>
             <p>P / Esc: Pause</p>
             <p>M: Mute</p>
+            <p>L: Level Select</p>
             <p style="color: #ffa502; margin-top: 10px;">💀 Auto-restarts on death!</p>
         </div>
         <div id="game-over" class="modal hidden">
@@ -57,6 +61,13 @@
                     <button id="restart-btn" class="btn">Restart Level</button>
                 </div>
                 <p class="hint">Press P / Esc to resume</p>
+            </div>
+        </div>
+        <div id="level-select" class="modal hidden">
+            <div class="modal-content select">
+                <h2>Choose a Level</h2>
+                <div id="level-select-grid" class="level-grid"></div>
+                <p class="hint">Press L / Esc to close</p>
             </div>
         </div>
         <div id="death-screen" class="modal hidden">
