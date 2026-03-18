@@ -93,6 +93,11 @@ body {
     box-shadow: 0 0 40px rgba(231, 76, 60, 0.5);
 }
 
+.modal-content.pause {
+    background: linear-gradient(135deg, #3742fa 0%, #2f3542 100%);
+    box-shadow: 0 0 40px rgba(55, 66, 250, 0.35);
+}
+
 .modal-content h2 {
     font-size: 2.5em;
     margin-bottom: 15px;
@@ -101,6 +106,42 @@ body {
 
 .modal-content p {
     font-size: 1.3em;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.btn {
+    appearance: none;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    background: rgba(0, 0, 0, 0.15);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255, 255, 255, 0.45);
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.btn.primary {
+    border-color: rgba(46, 204, 113, 0.6);
+    background: rgba(46, 204, 113, 0.15);
+}
+
+.hint {
+    margin-top: 14px;
+    font-size: 1.05em;
+    color: rgba(255, 255, 255, 0.85);
 }
 
 @keyframes modalAppear {

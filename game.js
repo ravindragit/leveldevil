@@ -12,6 +12,7 @@ let gameState = {
     deaths: 0,
     keys: {},
     gameRunning: true,
+    paused: false,
     levelTimer: 0,
     deathAnimation: {
         active: false,
@@ -312,6 +313,7 @@ function loadLevel(levelIndex) {
     player.onGround = false;
     gameState.currentLevel = levelIndex;
     gameState.gameRunning = true;
+    gameState.paused = false;
     gameState.levelTimer = 0;
     
     // Reset all triggers and dynamic elements
@@ -347,13 +349,20 @@ function loadLevel(levelIndex) {
     document.getElementById('death-count').textContent = gameState.deaths;
     hideModal('game-over');
     hideModal('death-screen');
+    hideModal('pause-screen');
 }
 
 // Input handling
 document.addEventListener('keydown', (e) => {
     gameState.keys[e.code] = true;
     
+    if (e.code === 'KeyP' || e.code === 'Escape') {
+        togglePause();
+        return;
+    }
+    
     if (e.code === 'KeyR') {
+        if (gameState.paused) togglePause(false);
         loadLevel(gameState.currentLevel);
     }
 });
@@ -361,6 +370,33 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('keyup', (e) => {
     gameState.keys[e.code] = false;
 });
+
+// Pause controls
+const resumeBtn = document.getElementById('resume-btn');
+const restartBtn = document.getElementById('restart-btn');
+
+if (resumeBtn) resumeBtn.addEventListener('click', () => togglePause(false));
+if (restartBtn) restartBtn.addEventListener('click', () => {
+    togglePause(false);
+    loadLevel(gameState.currentLevel);
+});
+
+function togglePause(forceValue) {
+    if (!gameState.gameRunning && !gameState.deathAnimation.active) return;
+    if (gameState.deathAnimation.active) return;
+    
+    const next = typeof forceValue === 'boolean' ? forceValue : !gameState.paused;
+    gameState.paused = next;
+    
+    if (gameState.paused) {
+        showModal('pause-screen');
+    } else {
+        hideModal('pause-screen');
+        // Prevent instant re-trigger when unpausing with the same keydown
+        gameState.keys['KeyP'] = false;
+        gameState.keys['Escape'] = false;
+    }
+}
 
 // Collision detection
 function checkCollision(rect1, rect2) {
@@ -538,6 +574,7 @@ function update() {
     }
     
     if (!gameState.gameRunning) return;
+    if (gameState.paused) return;
     
     const level = levels[gameState.currentLevel];
     
@@ -682,6 +719,9 @@ function levelComplete() {
 // Modal functions
 function showModal(id) {
     document.getElementById(id).classList.remove('hidden');
+    
+    // Only some modals advance on SPACE
+    if (id !== 'game-over' && id !== 'death-screen') return;
     
     const modalHandler = (e) => {
         if (e.code === 'Space') {

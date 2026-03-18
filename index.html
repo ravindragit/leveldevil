@@ -21,12 +21,23 @@
             <p>← → Arrow Keys: Move</p>
             <p>Space / ↑: Jump</p>
             <p>R: Restart Level</p>
+            <p>P / Esc: Pause</p>
             <p style="color: #ffa502; margin-top: 10px;">💀 Auto-restarts on death!</p>
         </div>
         <div id="game-over" class="modal hidden">
             <div class="modal-content">
                 <h2>Level Complete!</h2>
                 <p>Press SPACE to continue</p>
+            </div>
+        </div>
+        <div id="pause-screen" class="modal hidden">
+            <div class="modal-content pause">
+                <h2>Paused</h2>
+                <div class="modal-actions">
+                    <button id="resume-btn" class="btn primary">Resume</button>
+                    <button id="restart-btn" class="btn">Restart Level</button>
+                </div>
+                <p class="hint">Press P / Esc to resume</p>
             </div>
         </div>
         <div id="death-screen" class="modal hidden">
