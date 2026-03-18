@@ -151,6 +151,7 @@ function playSound(type) {
     if (type === 'complete') { freq = 880; dur = 0.12; vol = 0.05; shape = 'triangle'; }
     if (type === 'pause') { freq = 330; dur = 0.05; vol = 0.04; shape = 'square'; }
     if (type === 'unpause') { freq = 392; dur = 0.05; vol = 0.04; shape = 'square'; }
+    if (type === 'warning') { freq = 246.94; dur = 0.08; vol = 0.045; shape = 'triangle'; }
     if (type === 'muteOn') { freq = 196; dur = 0.06; vol = 0.035; shape = 'triangle'; }
     if (type === 'muteOff') { freq = 523.25; dur = 0.06; vol = 0.035; shape = 'triangle'; }
     
@@ -864,6 +865,7 @@ function processTriggers() {
                 const block = level.fallingBlocks[trigger.target];
                 block.visible = true;
                 block.triggered = true;
+                playSound('warning');
             }
         } else if (trigger.condition === 'platformLanding') {
             // Only trigger when player lands on the specific platform
@@ -882,6 +884,7 @@ function processTriggers() {
                     const block = level.fallingBlocks[trigger.target];
                     block.visible = true;
                     block.triggered = true;
+                    playSound('warning');
                 }
             }
         } else if (trigger.condition === 'timer' && gameState.levelTimer > trigger.time) {
@@ -895,6 +898,7 @@ function processTriggers() {
                 const block = level.fallingBlocks[trigger.target];
                 block.visible = true;
                 block.triggered = true;
+                playSound('warning');
             }
         } else if (trigger.condition === 'platformTouch') {
             const platform = level.disappearingPlatforms[trigger.platformIndex];
