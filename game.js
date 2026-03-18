@@ -519,6 +519,48 @@ document.addEventListener('keyup', (e) => {
     gameState.keys[e.code] = false;
 });
 
+// Touch controls
+function setKey(code, pressed) {
+    gameState.keys[code] = pressed;
+}
+
+function bindHoldButton(btn, keyCode) {
+    if (!btn) return;
+    const down = (e) => {
+        e.preventDefault();
+        setKey(keyCode, true);
+    };
+    const up = (e) => {
+        e.preventDefault();
+        setKey(keyCode, false);
+    };
+    btn.addEventListener('pointerdown', down);
+    btn.addEventListener('pointerup', up);
+    btn.addEventListener('pointercancel', up);
+    btn.addEventListener('pointerleave', up);
+}
+
+function bindActionButton(btn, action) {
+    if (!btn) return;
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (action === 'restart') {
+            if (gameState.paused) togglePause(false);
+            loadLevel(gameState.currentLevel);
+        } else if (action === 'pause') {
+            togglePause();
+        }
+    });
+}
+
+document.querySelectorAll('.touch-btn[data-key]').forEach((btn) => {
+    bindHoldButton(btn, btn.getAttribute('data-key'));
+});
+
+document.querySelectorAll('.touch-btn[data-action]').forEach((btn) => {
+    bindActionButton(btn, btn.getAttribute('data-action'));
+});
+
 // Pause controls
 const resumeBtn = document.getElementById('resume-btn');
 const restartBtn = document.getElementById('restart-btn');
