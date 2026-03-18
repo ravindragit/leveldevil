@@ -43,11 +43,16 @@ let settings = loadSettings();
 function loadSettings() {
     try {
         const raw = localStorage.getItem(SETTINGS_KEY);
-        if (!raw) return { muted: false };
+        if (!raw) return { muted: false, reducedMotion: false, hud: false, lastLevel: null };
         const parsed = JSON.parse(raw);
-        return { muted: Boolean(parsed.muted) };
+        return {
+            muted: Boolean(parsed.muted),
+            reducedMotion: Boolean(parsed.reducedMotion),
+            hud: Boolean(parsed.hud),
+            lastLevel: typeof parsed.lastLevel === 'number' ? parsed.lastLevel : null
+        };
     } catch {
-        return { muted: false };
+        return { muted: false, reducedMotion: false, hud: false, lastLevel: null };
     }
 }
 
@@ -85,6 +90,11 @@ function toggleMuted() {
     }
     setMuted(false);
     playSound('muteOff');
+}
+
+function toggleReducedMotion() {
+    settings.reducedMotion = !settings.reducedMotion;
+    saveSettings();
 }
 
 function updateMuteUI() {
@@ -466,6 +476,10 @@ function loadLevel(levelIndex) {
     gameState.gameRunning = true;
     gameState.paused = false;
     gameState.levelTimer = 0;
+
+    // Persist last played level (for reload convenience)
+    settings.lastLevel = levelIndex;
+    saveSettings();
     
     // Reset all triggers and dynamic elements
     level.triggers.forEach(trigger => {
@@ -530,6 +544,11 @@ document.addEventListener('keydown', (e) => {
 
     if (e.code === 'KeyF') {
         toggleFullscreen();
+        return;
+    }
+
+    if (e.code === 'KeyV') {
+        toggleReducedMotion();
         return;
     }
     
@@ -1183,7 +1202,7 @@ function draw() {
     level.disappearingPlatforms.forEach(platform => {
         if (!platform.disappeared) {
             // Blinking effect when disappearing
-            if (platform.disappearing && platform.timer > 30) {
+            if (!settings.reducedMotion && platform.disappearing && platform.timer > 30) {
                 const blinkFrequency = Math.floor(platform.timer / 5);
                 if (blinkFrequency % 2 === 0) {
                     ctx.globalAlpha = 0.3;
@@ -1227,8 +1246,8 @@ function draw() {
         const deathY = gameState.deathAnimation.y;
         const progress = gameState.deathAnimation.timer / gameState.deathAnimation.maxTime;
         
-        // Pulsating red X effect
-        const pulseScale = 1 + Math.sin(progress * Math.PI * 8) * 0.3;
+        // Pulsating red X effect (optional for reduced motion)
+        const pulseScale = settings.reducedMotion ? 1 : (1 + Math.sin(progress * Math.PI * 8) * 0.3);
         const opacity = 1 - progress; // Fade out
         
         ctx.save();
