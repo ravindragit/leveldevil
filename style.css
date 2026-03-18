@@ -59,6 +59,22 @@ body {
     border-color: rgba(255, 255, 255, 0.35);
 }
 
+.icon-btn:focus-visible,
+.btn:focus-visible,
+.touch-btn:focus-visible,
+.level-tile:focus-visible {
+    outline: 3px solid rgba(46, 204, 113, 0.9);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px rgba(46, 204, 113, 0.18);
+}
+
+.icon-btn:focus,
+.btn:focus,
+.touch-btn:focus,
+.level-tile:focus {
+    outline: none;
+}
+
 .game-stats {
     margin-top: 10px;
     display: flex;
