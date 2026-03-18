@@ -8,6 +8,7 @@ const PLAYER_SIZE = 30;
 
 // Persistence (localStorage)
 const STORAGE_KEY = 'leveldevil:stats:v1';
+const SETTINGS_KEY = 'leveldevil:settings:v1';
 
 // Game State
 let gameState = {
@@ -27,6 +28,98 @@ let gameState = {
 };
 
 let persistentStats = loadStats();
+
+let settings = loadSettings();
+
+function loadSettings() {
+    try {
+        const raw = localStorage.getItem(SETTINGS_KEY);
+        if (!raw) return { muted: false };
+        const parsed = JSON.parse(raw);
+        return { muted: Boolean(parsed.muted) };
+    } catch {
+        return { muted: false };
+    }
+}
+
+function saveSettings() {
+    try {
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    } catch {
+        // ignore
+    }
+}
+
+// Audio (simple WebAudio synth beeps)
+let audioCtx = null;
+
+function ensureAudioContext() {
+    if (audioCtx) return audioCtx;
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    audioCtx = new Ctx();
+    return audioCtx;
+}
+
+function setMuted(nextMuted) {
+    settings.muted = Boolean(nextMuted);
+    saveSettings();
+    updateMuteUI();
+}
+
+function toggleMuted() {
+    if (!settings.muted) {
+        // Play feedback before muting
+        playSound('muteOn');
+        setMuted(true);
+        return;
+    }
+    setMuted(false);
+    playSound('muteOff');
+}
+
+function updateMuteUI() {
+    const btn = document.getElementById('mute-btn');
+    if (!btn) return;
+    btn.textContent = settings.muted ? '🔇' : '🔊';
+    btn.setAttribute('aria-label', settings.muted ? 'Unmute' : 'Mute');
+    btn.setAttribute('title', settings.muted ? 'Unmute (M)' : 'Mute (M)');
+}
+
+function playSound(type) {
+    if (settings.muted) return;
+    const ctx = ensureAudioContext();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    let freq = 440;
+    let dur = 0.09;
+    let vol = 0.05;
+    let shape = 'square';
+    
+    if (type === 'jump') { freq = 660; dur = 0.06; vol = 0.045; shape = 'square'; }
+    if (type === 'death') { freq = 110; dur = 0.16; vol = 0.06; shape = 'sawtooth'; }
+    if (type === 'complete') { freq = 880; dur = 0.12; vol = 0.05; shape = 'triangle'; }
+    if (type === 'pause') { freq = 330; dur = 0.05; vol = 0.04; shape = 'square'; }
+    if (type === 'unpause') { freq = 392; dur = 0.05; vol = 0.04; shape = 'square'; }
+    if (type === 'muteOn') { freq = 196; dur = 0.06; vol = 0.035; shape = 'triangle'; }
+    if (type === 'muteOff') { freq = 523.25; dur = 0.06; vol = 0.035; shape = 'triangle'; }
+    
+    osc.type = shape;
+    osc.frequency.setValueAtTime(freq, now);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(vol, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+    
+    osc.start(now);
+    osc.stop(now + dur + 0.02);
+}
 
 function loadStats() {
     try {
@@ -406,6 +499,11 @@ function loadLevel(levelIndex) {
 document.addEventListener('keydown', (e) => {
     gameState.keys[e.code] = true;
     
+    if (e.code === 'KeyM') {
+        toggleMuted();
+        return;
+    }
+    
     if (e.code === 'KeyP' || e.code === 'Escape') {
         togglePause();
         return;
@@ -424,12 +522,14 @@ document.addEventListener('keyup', (e) => {
 // Pause controls
 const resumeBtn = document.getElementById('resume-btn');
 const restartBtn = document.getElementById('restart-btn');
+const muteBtn = document.getElementById('mute-btn');
 
 if (resumeBtn) resumeBtn.addEventListener('click', () => togglePause(false));
 if (restartBtn) restartBtn.addEventListener('click', () => {
     togglePause(false);
     loadLevel(gameState.currentLevel);
 });
+if (muteBtn) muteBtn.addEventListener('click', () => toggleMuted());
 
 function togglePause(forceValue) {
     if (!gameState.gameRunning && !gameState.deathAnimation.active) return;
@@ -440,8 +540,10 @@ function togglePause(forceValue) {
     
     if (gameState.paused) {
         showModal('pause-screen');
+        playSound('pause');
     } else {
         hideModal('pause-screen');
+        playSound('unpause');
         // Prevent instant re-trigger when unpausing with the same keydown
         gameState.keys['KeyP'] = false;
         gameState.keys['Escape'] = false;
@@ -650,6 +752,7 @@ function update() {
     if ((gameState.keys['Space'] || gameState.keys['ArrowUp']) && player.onGround) {
         player.velocityY = JUMP_FORCE;
         player.onGround = false;
+        playSound('jump');
         gameState.keys['Space'] = false;
         gameState.keys['ArrowUp'] = false;
     }
@@ -743,6 +846,7 @@ function update() {
 function playerDie() {
     gameState.deaths++;
     gameState.gameRunning = false;
+    playSound('death');
     
     // Store death position and activate death animation
     gameState.deathAnimation.active = true;
@@ -758,6 +862,7 @@ function playerDie() {
 function levelComplete() {
     gameState.gameRunning = false;
     showModal('game-over');
+    playSound('complete');
 
     // Persist best time for this level
     const elapsedMs = Math.round((gameState.levelTimer / 60) * 1000);
@@ -1024,5 +1129,6 @@ function getStartLevel() {
 // Start game
 loadLevel(getStartLevel());
 updateStatsUI();
+updateMuteUI();
 gameLoop();
 

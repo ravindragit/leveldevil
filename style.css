@@ -35,9 +35,28 @@ body {
 .game-info {
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 30px;
     font-size: 1.2em;
     color: #ffa502;
+}
+
+.icon-btn {
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border-radius: 12px;
+    padding: 6px 10px;
+    cursor: pointer;
+    line-height: 1;
+    font-size: 1.05em;
+    transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.icon-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.35);
 }
 
 .game-stats {
