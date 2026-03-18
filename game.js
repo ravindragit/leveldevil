@@ -193,6 +193,7 @@ const player = {
     velocityX: 0,
     velocityY: 0,
     onGround: false,
+    coyoteTimer: 0,
     color: '#3498db'
 };
 
@@ -935,9 +936,11 @@ function update() {
     }
     
     // Jumping
-    if ((gameState.keys['Space'] || gameState.keys['ArrowUp']) && player.onGround) {
+    const jumpPressed = gameState.keys['Space'] || gameState.keys['ArrowUp'];
+    if (jumpPressed && (player.onGround || player.coyoteTimer > 0)) {
         player.velocityY = JUMP_FORCE;
         player.onGround = false;
+        player.coyoteTimer = 0;
         playSound('jump');
         gameState.keys['Space'] = false;
         gameState.keys['ArrowUp'] = false;
@@ -1013,6 +1016,13 @@ function update() {
             checkPlatformCollision(player, platform);
         }
     });
+
+    // Coyote time (a few frames of grace after leaving ground)
+    if (player.onGround) {
+        player.coyoteTimer = 6;
+    } else if (player.coyoteTimer > 0) {
+        player.coyoteTimer--;
+    }
     
     // Check goal collision
     if (checkCollision(player, level.goal)) {
