@@ -1408,6 +1408,9 @@ function getStartLevel() {
             return 0;
         }
     }
+    if (typeof settings.lastLevel === 'number' && settings.lastLevel >= 0 && settings.lastLevel < levels.length) {
+        return settings.lastLevel;
+    }
     return 0; // Default to first level
 }
 
