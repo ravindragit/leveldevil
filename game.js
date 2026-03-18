@@ -705,6 +705,35 @@ function setKey(code, pressed) {
     gameState.keys[code] = pressed;
 }
 
+// Swipe up on canvas to jump (mobile)
+let swipeStartY = null;
+let swipeStartX = null;
+canvas.addEventListener('touchstart', (e) => {
+    if (!e.touches || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    swipeStartY = t.clientY;
+    swipeStartX = t.clientX;
+}, { passive: true });
+
+canvas.addEventListener('touchmove', (e) => {
+    if (swipeStartY == null || swipeStartX == null) return;
+    if (!e.touches || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    const dy = t.clientY - swipeStartY;
+    const dx = t.clientX - swipeStartX;
+    // Upward swipe with minimal horizontal drift
+    if (dy < -45 && Math.abs(dx) < 60) {
+        gameState.jumpBuffer = 6;
+        swipeStartY = null;
+        swipeStartX = null;
+    }
+}, { passive: true });
+
+canvas.addEventListener('touchend', () => {
+    swipeStartY = null;
+    swipeStartX = null;
+}, { passive: true });
+
 function bindHoldButton(btn, keyCode) {
     if (!btn) return;
     const down = (e) => {
