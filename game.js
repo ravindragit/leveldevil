@@ -575,6 +575,11 @@ document.addEventListener('keyup', (e) => {
         e.preventDefault();
     }
     gameState.keys[e.code] = false;
+
+    // Variable jump height: releasing jump early cuts the ascent
+    if ((e.code === 'Space' || e.code === 'ArrowUp') && player.velocityY < 0) {
+        player.velocityY *= 0.55;
+    }
 });
 
 // Fullscreen
