@@ -514,7 +514,8 @@ function loadLevel(levelIndex) {
     // Reset fake goal
     if (level.goal.isFake) {
         level.goal.moveOnApproach = true;
-        level.goal.y = level.goal.y === level.realGoalY ? 500 : level.goal.y;
+        // Always reset to the "fake" door position at the bottom
+        level.goal.y = 500;
     }
     
     document.getElementById('level-display').textContent = levelIndex + 1;
