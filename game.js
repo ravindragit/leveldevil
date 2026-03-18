@@ -98,6 +98,11 @@ function toggleReducedMotion() {
     saveSettings();
 }
 
+function toggleHud() {
+    settings.hud = !settings.hud;
+    saveSettings();
+}
+
 function updateMuteUI() {
     const btn = document.getElementById('mute-btn');
     if (!btn) return;
@@ -551,6 +556,11 @@ document.addEventListener('keydown', (e) => {
 
     if (e.code === 'KeyV') {
         toggleReducedMotion();
+        return;
+    }
+    
+    if (e.code === 'KeyH') {
+        toggleHud();
         return;
     }
     
@@ -1304,6 +1314,18 @@ function draw() {
         ctx.textAlign = 'center';
         ctx.fillText('☠', deathX + PLAYER_SIZE / 2, deathY - 10);
         
+        ctx.restore();
+    }
+
+    // HUD (optional)
+    if (settings.hud) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.font = '14px Arial';
+        ctx.textAlign = 'left';
+        const t = (gameState.levelTimer / 60);
+        ctx.fillText(`Time: ${t.toFixed(1)}s`, 12, 22);
+        ctx.fillText(`Level: ${gameState.currentLevel + 1}/${levels.length}`, 12, 40);
         ctx.restore();
     }
 }
