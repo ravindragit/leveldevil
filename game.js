@@ -27,6 +27,7 @@ let gameState = {
     gameRunning: true,
     paused: false,
     levelTimer: 0,
+    jumpBuffer: 0,
     deathAnimation: {
         active: false,
         x: 0,
@@ -926,6 +927,9 @@ function update() {
     updateDisappearingPlatforms();
     updateFakeGoal();
     
+    // Jump buffer countdown
+    if (gameState.jumpBuffer > 0) gameState.jumpBuffer--;
+    
     // Player movement
     player.velocityX = 0;
     if (gameState.keys['ArrowLeft']) {
@@ -937,13 +941,18 @@ function update() {
     
     // Jumping
     const jumpPressed = gameState.keys['Space'] || gameState.keys['ArrowUp'];
-    if (jumpPressed && (player.onGround || player.coyoteTimer > 0)) {
+    if (jumpPressed) {
+        gameState.jumpBuffer = 6; // ~100ms at 60fps
+        gameState.keys['Space'] = false;
+        gameState.keys['ArrowUp'] = false;
+    }
+    
+    if (gameState.jumpBuffer > 0 && (player.onGround || player.coyoteTimer > 0)) {
         player.velocityY = JUMP_FORCE;
         player.onGround = false;
         player.coyoteTimer = 0;
+        gameState.jumpBuffer = 0;
         playSound('jump');
-        gameState.keys['Space'] = false;
-        gameState.keys['ArrowUp'] = false;
     }
     
     // Apply gravity
