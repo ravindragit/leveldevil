@@ -498,10 +498,14 @@ function loadLevel(levelIndex) {
     player.velocityX = 0;
     player.velocityY = 0;
     player.onGround = false;
+    player.coyoteTimer = 0;
     gameState.currentLevel = levelIndex;
     gameState.gameRunning = true;
     gameState.paused = false;
     gameState.levelTimer = 0;
+    gameState.jumpBuffer = 0;
+    gameState.deathAnimation.active = false;
+    gameState.deathAnimation.timer = 0;
 
     // Persist last played level (for reload convenience)
     settings.lastLevel = levelIndex;
@@ -543,6 +547,7 @@ function loadLevel(levelIndex) {
     hideModal('game-over');
     hideModal('death-screen');
     hideModal('pause-screen');
+    hideModal('level-select');
 }
 
 // Input handling
