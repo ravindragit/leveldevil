@@ -17,6 +17,7 @@ function clearAllSavedData() {
     settings = loadSettings();
     updateStatsUI();
     updateMuteUI();
+    showToast('Cleared saved data');
 }
 
 // Game State
@@ -87,20 +88,37 @@ function toggleMuted() {
         // Play feedback before muting
         playSound('muteOn');
         setMuted(true);
+        showToast('Muted');
         return;
     }
     setMuted(false);
     playSound('muteOff');
+    showToast('Unmuted');
 }
 
 function toggleReducedMotion() {
     settings.reducedMotion = !settings.reducedMotion;
     saveSettings();
+    showToast(settings.reducedMotion ? 'Reduced motion: ON' : 'Reduced motion: OFF');
 }
 
 function toggleHud() {
     settings.hud = !settings.hud;
     saveSettings();
+    showToast(settings.hud ? 'HUD: ON' : 'HUD: OFF');
+}
+
+// Toasts
+let toastTimer = null;
+function showToast(message) {
+    const el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = message;
+    el.classList.add('show');
+    if (toastTimer) window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => {
+        el.classList.remove('show');
+    }, 1300);
 }
 
 function updateMuteUI() {
@@ -623,6 +641,7 @@ function toggleFullscreen() {
 
 document.addEventListener('fullscreenchange', () => {
     updateFullscreenUI();
+    showToast(isFullscreen() ? 'Fullscreen' : 'Windowed');
 });
 
 // Level select
@@ -671,11 +690,13 @@ function toggleLevelSelect(forceValue) {
         // Pause gameplay while selecting
         if (!gameState.paused) togglePause(true, { showOverlay: false });
         levelSelectModal.classList.remove('hidden');
+        showToast('Level select');
     } else {
         levelSelectModal.classList.add('hidden');
         // Keep the game paused if the pause modal is showing; otherwise resume.
         if (!document.getElementById('pause-screen')?.classList.contains('hidden')) return;
         togglePause(false, { showOverlay: false });
+        showToast('Back to game');
     }
 }
 
@@ -745,9 +766,11 @@ function togglePause(forceValue, options = {}) {
         if (showOverlay) showModal('pause-screen');
         else hideModal('pause-screen');
         playSound('pause');
+        showToast('Paused');
     } else {
         hideModal('pause-screen');
         playSound('unpause');
+        showToast('Resumed');
         // Prevent instant re-trigger when unpausing with the same keydown
         gameState.keys['KeyP'] = false;
         gameState.keys['Escape'] = false;
